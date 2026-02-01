@@ -1,2 +1,3 @@
 cashier-api
 *.log
+.env
