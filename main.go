@@ -61,7 +61,7 @@ func main() {
 	http.HandleFunc("/api/categories", categoryHandler.HandleCategories)
 	http.HandleFunc("/api/categories/", categoryHandler.HandleCategoryByID)
 
-	addr := "localhost:" + config.Port
+	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server running in", addr)
 
 	err = http.ListenAndServe(addr, nil)
