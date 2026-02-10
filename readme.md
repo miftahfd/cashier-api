@@ -82,7 +82,7 @@ The server will run on:
 
 ### Health Check
 
-**GET** `/api/health`
+**GET** `/health`
 
 **Response**
 

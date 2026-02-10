@@ -10,15 +10,15 @@ import (
 	"strings"
 )
 
-type CategoryHandler struct {
-	service *services.CategoryService
+type ProductHandler struct {
+	service *services.ProductService
 }
 
-func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
-	return &CategoryHandler{service: service}
+func NewProductHandler(service *services.ProductService) *ProductHandler {
+	return &ProductHandler{service: service}
 }
 
-func (h *CategoryHandler) HandleCategories(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.GetAll(w, r)
@@ -29,10 +29,10 @@ func (h *CategoryHandler) HandleCategories(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	categories, err := h.service.GetAll()
+	products, err := h.service.GetAll()
 	if err != nil {
 		response.ErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -40,33 +40,33 @@ func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	response := response.ResponseWithData{
 		Status:  true,
-		Message: "Get All Category",
-		Data:    categories,
+		Message: "Get All Product",
+		Data:    products,
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var category models.Category
-	err := json.NewDecoder(r.Body).Decode(&category)
+	var product models.Product
+	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		response.ErrorResponse(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	err = h.service.Create(&category)
+	err = h.service.Create(&product)
 	if err != nil {
 		response.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(category)
+	json.NewEncoder(w).Encode(product)
 }
 
-func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) HandleProductByID(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.GetByID(w, r)
@@ -79,17 +79,17 @@ func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (h *CategoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/products/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.ErrorResponse(w, "Invalid category ID", http.StatusBadRequest)
+		response.ErrorResponse(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
 
-	category, err := h.service.GetByID(id)
+	product, err := h.service.GetByID(id)
 	if err != nil {
 		response.ErrorResponse(w, err.Error(), http.StatusNotFound)
 		return
@@ -97,31 +97,31 @@ func (h *CategoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	response := response.ResponseWithData{
 		Status:  true,
-		Message: "Get Category",
-		Data:    category,
+		Message: "Get Product",
+		Data:    product,
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/products/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.ErrorResponse(w, "Invalid category ID", http.StatusBadRequest)
+		response.ErrorResponse(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
 
-	var category models.Category
-	err = json.NewDecoder(r.Body).Decode(&category)
+	var product models.Product
+	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		response.ErrorResponse(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	category.ID = id
-	err = h.service.Update(&category)
+	product.ID = id
+	err = h.service.Update(&product)
 	if err != nil {
 		response.ErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -129,19 +129,19 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	response := response.ResponseWithData{
 		Status:  true,
-		Message: "Update Category",
-		Data:    category,
+		Message: "Update Product",
+		Data:    product,
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/products/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.ErrorResponse(w, "Invalid category ID", http.StatusBadRequest)
+		response.ErrorResponse(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
 
@@ -153,7 +153,7 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	response := response.Response{
 		Status:  true,
-		Message: "Success delete category",
+		Message: "Success delete product",
 	}
 	json.NewEncoder(w).Encode(response)
 }

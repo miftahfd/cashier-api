@@ -4,6 +4,7 @@ import (
 	"cashier-api/database"
 	"cashier-api/handlers"
 	"cashier-api/repositories"
+	"cashier-api/response"
 	"cashier-api/services"
 	"encoding/json"
 	"fmt"
@@ -18,11 +19,6 @@ import (
 type Config struct {
 	Port   string `mapstructure:"PORT"`
 	DBConn string `mapstructure:"DB_CONN"`
-}
-
-type Response struct {
-	Status  bool   `json:"status"`
-	Message string `json:"message"`
 }
 
 func main() {
@@ -45,14 +41,21 @@ func main() {
 	}
 	defer db.Close()
 
-	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		response := Response{
+		response := response.Response{
 			Status:  true,
 			Message: "API Running",
 		}
 		json.NewEncoder(w).Encode(response)
 	})
+
+	productRepo := repositories.NewProductRepository(db)
+	productService := services.NewProductService(productRepo)
+	productHandler := handlers.NewProductHandler(productService)
+
+	http.HandleFunc("/api/products", productHandler.HandleProducts)
+	http.HandleFunc("/api/products/", productHandler.HandleProductByID)
 
 	categoryRepo := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepo)
