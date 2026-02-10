@@ -3,6 +3,7 @@ package repositories
 import (
 	"cashier-api/models"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -83,4 +84,37 @@ func (repo *TransactionRepository) CreateTransaction(items []models.CheckoutItem
 		TotalAmount: totalAmount,
 		Details:     details,
 	}, nil
+}
+
+func (repo *TransactionRepository) GetReport() (*models.Report, error) {
+	var report models.Report
+
+	query := "SELECT COALESCE(SUM(total_amount), 0) AS total_amount, COUNT(*) AS total_transaction FROM transactions WHERE DATE(created_at) = CURRENT_DATE"
+	err := repo.db.QueryRow(query).Scan(&report.TotalRevenue, &report.TotalTransaction)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("Report not found")
+	}
+
+	queryTopProduct := `
+		SELECT
+			p.name,
+			SUM(td.quantity) AS total_qty
+		FROM transaction_details td
+		JOIN transactions t ON t.id = td.transaction_id
+		JOIN products p ON td.product_id = p.id
+		WHERE DATE(t.created_at) = CURRENT_DATE
+		GROUP BY td.product_id, p.name
+		ORDER BY total_qty DESC
+		LIMIT 1
+	`
+	err = repo.db.QueryRow(queryTopProduct).Scan(&report.TopSellProduct.Name, &report.TopSellProduct.QuantitySell)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("Report not found")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &report, nil
 }
