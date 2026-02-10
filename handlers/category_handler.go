@@ -63,7 +63,12 @@ func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(category)
+	response := response.ResponseWithData{
+		Status:  true,
+		Message: "Create category",
+		Data:    category,
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Request) {

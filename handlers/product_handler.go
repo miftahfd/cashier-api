@@ -32,7 +32,9 @@ func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) 
 func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	products, err := h.service.GetAll()
+	name := r.URL.Query().Get("name")
+
+	products, err := h.service.GetAll(name)
 	if err != nil {
 		response.ErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,7 +65,12 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(product)
+	response := response.ResponseWithData{
+		Status:  true,
+		Message: "Create Product",
+		Data:    product,
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *ProductHandler) HandleProductByID(w http.ResponseWriter, r *http.Request) {
